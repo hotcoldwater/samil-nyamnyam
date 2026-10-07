@@ -676,13 +676,14 @@
       '</div><div class="spacer"></div>' + tabbar('account') + '</div>';
   }
   function vNotifs() {
+    var unreadIds = S.notifs.filter(function (n) { return !n.read; }).map(function (n) { return n.id; });
+    S.notifs.forEach(function (n) { n.read = true; }); save();
     var html = '<div class="screen" data-screen="notifs" aria-label="알림">' + header() + '<div style="display:flex;flex-direction:column;gap:16px;padding:20px 20px 32px"><div style="display:flex;align-items:center;gap:8px"><a href="#back" data-act="back" aria-label="뒤로" class="hdr-btn" style="margin-left:-10px">' + I.back() + '</a><h1 style="margin:0;font-size:24px;line-height:32px;font-weight:700">알림</h1></div>' +
       '<section class="card" style="padding:4px 20px">' + (S.notifs.length ? S.notifs.map(function (n) {
         var ic = n.kind === 'in' ? I.box(20) : (n.kind === 'pre' ? I.clock(20, '#C05408') : I.pen(18));
-        return '<div class="notif' + (n.read ? '' : ' is-unread') + '"><span class="menu-btn__ic" style="width:40px;height:40px">' + ic + '</span><div style="flex:1;display:flex;flex-direction:column;gap:2px"><span class="notif__t">' + esc(n.title) + '</span><span class="notif__s">' + esc(n.body) + '</span></div><span class="notif__s">' + hhmm(n.t) + '</span></div>';
+        return '<div class="notif' + (unreadIds.indexOf(n.id) >= 0 ? ' is-unread' : '') + '"><span class="menu-btn__ic" style="width:40px;height:40px">' + ic + '</span><div style="flex:1;display:flex;flex-direction:column;gap:2px"><span class="notif__t">' + esc(n.title) + '</span><span class="notif__s">' + esc(n.body) + '</span></div><span class="notif__s">' + hhmm(n.t) + '</span></div>';
       }).join('') : '<p class="empty">아직 받은 알림이 없어요</p>') + '</section>' +
       '<p style="margin:0;font-size:12px;line-height:18px;color:var(--ink-500)">입고 알림은 입고 한 번에 한 건만 보내요. 생수·커피처럼 알림 대상이 아닌 품목은 알림 없이 수량만 바뀌어요.</p></div><div class="spacer"></div>' + tabbar('') + '</div>';
-    S.notifs.forEach(function (n) { n.read = true; }); save();
     return html;
   }
 

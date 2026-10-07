@@ -17,7 +17,7 @@ img, svg { max-width: 100%; }
 
 /* ---- 앱 영역: 모바일은 화면 전체, 데스크톱은 가운데 430px 기둥 ---- */
 .app { max-width: 430px; margin: 0 auto; min-height: 100vh; background: var(--ground); box-shadow: 0 0 0 1px rgba(34,34,34,.04), 0 20px 60px rgba(60,40,10,.12); }
-.screen { position: relative; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; background: var(--ground); }
+.screen { position: relative; display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; overflow-x: clip; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; background: var(--ground); }
 .spacer { flex: 1; }
 
 /* ---- 상단바 ---- */
@@ -263,3 +263,17 @@ button.btn-sm { appearance: none; -webkit-appearance: none; border: 0; cursor: p
   .guide__links a, .guide__links button { display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border-radius: 999px; background: rgba(250,129,18,.12); font-size: 13px; font-family: inherit; font-weight: 700; color: var(--page-ink); border: 0; cursor: pointer; }
   .guide small { color: var(--page-ink); opacity: .7; }
 }
+
+/* [개선 1] 간식 고르기 하단 고정 바 — 탭바 바로 위, 기존 토큰만 사용 */
+.pickbar { position: fixed; left: 50%; bottom: calc(74px + env(safe-area-inset-bottom, 0px)); z-index: 6; width: calc(min(430px, 100vw) - 24px); transform: translateX(-50%); display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 16px; border-radius: 18px; background: var(--surface); border: 2px solid var(--brand-500); box-shadow: 0 8px 24px rgba(60,40,10,.16); transition: opacity .18s ease, transform .18s ease; }
+.pickbar.is-hidden { opacity: 0; transform: translate(-50%, 12px); pointer-events: none; }
+.pickbar__info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pickbar__count { font-size: 15px; line-height: 20px; font-weight: 700; color: var(--brand-800); }
+.pickbar__sum { font-size: 13px; line-height: 18px; color: var(--ink-500); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pickbar__btn { flex-shrink: 0; width: auto; height: 44px; padding: 0 16px; font-size: 15px; }
+
+/* [개선 2] 줄 인원을 아직 고르지 않았을 때 − 버튼 비활성 */
+.stepper button[aria-disabled="true"] { opacity: .35; cursor: not-allowed; }
+
+/* [개선 3] 같은 화면 안 갱신(수량·선택 변경)은 애니메이션 없이 바로 반영 — 화면 전환 때만 페이드 */
+.screen.is-static, .screen.is-static .done-hero__icon { animation: none; }
