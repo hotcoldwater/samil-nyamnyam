@@ -1,0 +1,216 @@
+삼일냠냠 디자인 토큰 (Design Tokens) v3
+출처: 레퍼런스 팔레트 #FAF3E1 · #F5E7C6 · #FA8112 · #222222 + 데모 화면 + 기획서 v5 + 목업 피드백
+테마: Light 1종 / 모바일 웹앱 기준
+
+[화면 구조]
+- 화면: 시작(흰 바탕, 3D 간식 일러스트 모션, 화면을 누르면 간식현황으로 이동) / 간식현황 / 간식 상세 / 간식수령·태그 / 간식수령·간식 고르기 / 리뷰 쓰기(바텀시트) / 내 계정.
+- 상단바: 로고만(포인트 표시 없음). surface 바탕 + 아래 line 1px + shadow-header.
+- 간식현황의 모든 간식은 각자의 상세로 이어진다. 상세의 남은 수량 카드는 수량·상태·썸네일만(입고량 대비 막대 없음). 리뷰가 없으면 빈 상태 카드.
+- '오늘 내 수령 기록'·적립 내역은 최신순. 포인트는 0P에서 시작, 수령 참여 1회 +20P, 리뷰 1건 +30P.
+- 하단 탭바(간식현황 · 간식수령 및 제보 · 내 계정)는 간식 상세 포함 모든 화면에. 수령 참여·리뷰 작성은 '간식수령 및 제보' 탭에서만 하고 간식 상세에는 행동 버튼을 두지 않는다.
+- 시즌 간식 카드: 좌우로 넘기는 캐러셀(스냅), 아래 점 인디케이터(현재 20×6 brand-500, 나머지 6×6 line-strong).
+- 리뷰 쓰기: 바닥 시트(상단 모서리 28px, 뒤 화면 45% 어둡게). 만족도 별 → 또 먹을래요?(하나) → 태그(여러 개) → 한마디(선택·40자) → '리뷰 남기고 30P 받기'.
+
+[사용 원칙]
+- 페이지 배경 ground(크림), 카드 surface, 카드 안 보조 타일 surface-sand. 시작 화면만 splash-ground(흰색).
+- 로고: '삼일'은 ink-900, '냠냠'은 logo-accent(#F34F00).
+- 주요 버튼(화면당 하나): 배경 action-primary(#C05408), 흰 글자 on-action, 그림자 shadow-action.
+- 할 일 버튼(리뷰 작성): action-tonal + on-tonal + 앞 연필 아이콘, 높이 36px. 완료 표시(리뷰 완료): status-done-bg(회색) + status-done-fg + 앞 체크 아이콘, 같은 크기, 누를 수 없음.
+- 선택 칩: 선택 전 chip-bg + 1px chip-border + chip-fg(600) / 선택 후 chip-selected-bg + chip-selected-fg(700). 칩·별 버튼은 브라우저 기본 모양을 지우고 색을 직접 지정(안 그러면 하늘색 기본 버튼이 보임).
+- 별점 입력: 고른 별 star-filled + star-filled-stroke, 안 고른 별 star-empty + star-empty-stroke. 별 40px, 터치 52px, ground 칸 안 가운데. 'n점/별을 눌러 주세요'는 제목 오른쪽 한 줄.
+- 사진 카드 스크림: 따뜻한 갈색 그라데이션 rgba(74,38,8) 0% 투명 → 42% 0.6 → 100% 0.8, 위에 흰 글자. 회색 스크림 금지.
+- 이미지: 사진이 없으면 이모지 대신 둥글고 광택 있는 3D 간식 일러스트(붕어빵은 얼굴 없이 노릇한 색과 틀 무늬만). 썸네일 바탕 illust-thumb-bg, 큰 카드 바탕 illust-*(붕어빵/요거트/아이스크림) + illust-halo 원. 일러스트는 천천히 떠다니고, 동작 줄이기 설정에서는 정지.
+- brand-500(#FA8112)은 진행 바·인디케이터 같은 면에만. 글자색·버튼 바탕으로 쓰지 않는다.
+- 오렌지 글자: 흰 카드 위 brand-700, 크림 바탕·brand-100 위 brand-800.
+- 상태는 항상 '점 + 글자'로(예: ● 6개 · 부족). 재고: 30% 초과 충분/30% 이하 부족/0 소진. 혼잡도: Q<5 여유, 5≤Q<15 보통, Q≥15 혼잡, 제보 3명 미만 확인 중.
+- 말투: 해요체, 짧고 다정하게. 숫자에는 단위(약 12개 남음, 2명).
+
+[색상 Color]
+brand-50               #FFF6EC                          가장 옅은 오렌지 틴트. 선택된 리스트 행, 눌림 배경.
+brand-100              #FEE3C6                          보조 버튼(action-tonal) 바탕, 포인트 필, 사원증 태그 버튼. 위 글자·아이콘은 brand-800(4.67:1).
+brand-500              #FA8112                          레퍼런스 핵심 오렌지. 진행 바·캐러셀 인디케이터·단계 표시처럼 글자가 올라가지 않는 '면'과 마크에 사용. 글자색·버튼 배경으로 쓰지 않음(크림 위 2.3:1, 흰 글자 2.6:1).
+brand-600              #E06D05                          흰 카드 위 24px 이상 큰 숫자(적립 포인트) — 흰색 위 3.3:1.
+brand-700              #C05408                          주요 버튼(action-primary)의 바탕, 흰 카드 위 오렌지 글자·아이콘(활성 탭 라벨, '20P' 강조, 링크). 흰 글자 4.65:1.
+brand-800              #A84A06                          크림 바탕이나 brand-100 위 오렌지 글자, 주요 버튼 눌림. 크림 위 5.2:1.
+logo-accent            #F34F00                          로고타입 '냠냠' 전용 색(삼일회계법인 PwC 오렌지에 맞춤). 로고 외 글자·버튼에는 쓰지 않음.
+action-primary         #C05408 (= brand-700)            주요 버튼 바탕(가져갔어요, 알려주고 20P 받기). 라벨은 on-action, 그림자 shadow-action.
+action-primary-pressed #A84A06 (= brand-800)            주요 버튼 눌림.
+on-action              #FFFFFF                          action-primary 위 라벨·아이콘(4.65:1). 라벨 옆 포인트 칩은 흰색 20% 바탕.
+action-tonal           #FEE3C6 (= brand-100)            보조 행동 버튼 바탕(초코우유 리뷰 +30P). 앞에 관련 아이콘, 글자는 on-tonal.
+on-tonal               #A84A06 (= brand-800)            action-tonal 위 글자·아이콘.
+ground                 #FAF3E1                          앱 전체 페이지 배경(레퍼런스 크림).
+surface                #FFFDF8                          카드·시트·탭바 표면. ground 위에 떠 있는 흰 면.
+surface-sand           #F5E7C6                          카드 안 보조 타일, 상시 배지 배경.
+surface-sunken         #F2EAD3                          입력 필드, 비활성 버튼, 단계 표시 바의 미완료 구간.
+line                   #EADDBC                          카드 안 구분선·목록 행 경계(헤어라인).
+line-strong            #D9C79C                          입력 필드·체크박스 테두리 등 컨트롤 경계.
+ink-900                #222222                          레퍼런스 블랙. 제목·본문·주요 숫자, 로고 '삼일'.
+ink-700                #4A443B                          보조 본문, 설명 문단.
+ink-500                #716755                          메타 정보(총무팀 예고, 최근 제보 시각), 캡션, 비활성 탭 라벨. 크림·카드·sand 위 4.5:1 이상.
+ink-300                #A99F8C                          플레이스홀더·비활성 글자(대비 예외), 장식 아이콘.
+on-dark                #FFFFFF                          사진 카드 스크림 위 글자, danger·success 채움 위 글자.
+scrim                  rgba(74, 38, 8, 0.8)             시즌 사진 카드 하단 스크림의 끝색(따뜻한 갈색). 그라데이션 0% 투명 → 42% 60% → 100% 80%로 깔고 위에 on-dark 글자. 회색 스크림은 쓰지 않음.
+season                 #FFC94A                          '시즌' 배지 배경. 위 글자는 ink-900(10.4:1).
+stock-ok               #276B2C                          재고 충분·혼잡 '여유' 글자와 점. 수량 > 직전 입고량의 30%.
+stock-ok-soft          #E5F2E1                          '여유' 상태 칩·배너 배경, 토글 켜짐은 stock-ok 사용.
+stock-low              #8A5A00                          재고 '부족'(직전 입고량 30% 이하)·혼잡 '보통' 글자.
+stock-low-dot          #F5B400                          부족·보통 상태 점. 점은 반드시 글자(예: '6개 · 부족')와 함께 — 색만으로 구분하지 않음.
+stock-low-soft         #FFF1C7                          '부족'·'보통' 칩 배경.
+stock-out              #C62828                          '소진'·혼잡 '혼잡' 글자와 점, 오류.
+stock-out-soft         #FCE5E1                          '소진'·'혼잡' 칩 배경. 위 글자는 stock-out-strong.
+stock-out-strong       #B42318                          stock-out-soft 위 글자.
+pending                #8C8476                          혼잡 '확인 중'(유효 제보 3명 미만) 점·아이콘. 글자는 ink-500.
+star                   #F5A100                          별점 별 아이콘. 숫자는 ink-900로 함께 표기.
+focus-ring             #C05408                          키보드 포커스 링(2px). 크림·흰 면 위 3:1 이상.
+splash-ground          #FFFFFF                          시작(스플래시) 화면 전용 흰 바탕. 다른 화면은 ground.
+chip-bg                #FFFDF8 (= surface)              선택 칩(또 먹을래요?, 태그) 선택 전 바탕.
+chip-border            #D9C79C (= line-strong)          선택 칩 선택 전 1px 테두리. 칩 안 글자가 식별을 맡으므로 테두리는 보조 신호.
+chip-fg                #4A443B (= ink-700)              선택 칩 선택 전 글자(600).
+chip-selected-bg       #FEE3C6 (= brand-100)            선택 칩 선택 후 바탕(테두리도 같은 색).
+chip-selected-fg       #A84A06 (= brand-800)            선택 칩 선택 후 글자(700). brand-100 위 4.67:1.
+status-done-bg         #ECEAE6                          완료돼 더 누를 수 없는 행동 표시(리뷰 완료) 바탕. 회색으로 '할 일'(action-tonal 주황)과 구분.
+status-done-fg         #716755 (= ink-500)              status-done-bg 위 글자·체크 아이콘(4.63:1).
+star-filled            #F5A100 (= star)                 별점 입력에서 고른 별 채움.
+star-filled-stroke     #E08E00                          고른 별 1px 외곽선.
+star-empty             #F2EAD3 (= surface-sunken)       별점 입력에서 아직 고르지 않은 별 채움.
+star-empty-stroke      #94804F                          고르지 않은 별 1.4px 외곽선 — ground 위 3.47:1로 별 모양이 보이게.
+illust-thumb-bg        #FFF1DC                          3D 간식 일러스트 썸네일 타일 바탕(일러스트는 타일의 82% 크기).
+illust-halo            rgba(255, 255, 255, 0.45)        사진·일러스트 카드 안 일러스트 뒤 원형 하이라이트.
+illust-bungeoppang     #FCD9A8                          붕어빵 카드·상세 히어로 바탕.
+illust-yogurt          #FBD3DC                          딸기 요거트 카드 바탕.
+illust-icecream        #D7EEE6                          아이스크림 카드 바탕.
+
+[글꼴 Typography]
+font-family: Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif
+굵기: 400 / 600 / 700 / 800
+
+display-logo   36px/42px  weight 800  letter-spacing -0.02em  예: "삼일냠냠"  — 스플래시·로그인 로고타입. '삼일' ink-900, '냠냠' brand-500.
+display-num    44px/48px  weight 800  letter-spacing -0.02em  예: "1,240P"  — 적립 포인트·재이용률 같은 핵심 수치. 흰 카드 위 brand-600 또는 ink-900.
+hero           30px/36px  weight 800  letter-spacing -0.02em  예: "미니 붕어빵"  — 시즌 사진 카드·간식 상세의 메뉴명.
+title-lg       24px/32px  weight 700  letter-spacing -0.01em  예: "간식수령 및 제보"  — 탭 화면 제목.
+title-md       20px/28px  weight 700  letter-spacing 0  예: "현재 대기 상태"  — 섹션·카드 제목(입고 예정, 상시 간식).
+title-sm       17px/24px  weight 700  letter-spacing 0  예: "초코우유"  — 목록 품목명, 버튼 라벨, 단계 질문.
+body           15px/22px  weight 400  letter-spacing 0  예: "탕비실 간식, 뭐가 남았고 줄은 어떤지 가기 전에 확인하세요."  — 기본 본문·설명.
+body-strong    15px/22px  weight 600  letter-spacing 0  예: "6개 · 부족"  — 수량·상태 값, 강조 본문.
+caption        13px/18px  weight 400  letter-spacing 0  예: "최근 제보 20:50 (방금)"  — 메타 정보, 도움말, 각주.
+label          11px/14px  weight 600  letter-spacing 0  예: "간식현황"  — 탭바 라벨, 배지(시즌·상시·데모).
+
+[간격 Spacing]
+space-1                4px  — 아이콘-글자 간격, 배지 세로 패딩.
+space-2                8px  — 칩 사이, 단계 바 사이, 캐러셀 인디케이터 간격.
+space-3                12px  — 카드 안 타일 사이, 썸네일-품목명 간격, 카드 사이 세로 간격.
+space-4                16px  — 목록 행 세로 패딩, 타일 내부 패딩.
+space-5                20px  — 화면 좌우 여백(gutter), 카드 내부 패딩.
+space-6                24px  — 섹션 제목과 카드 사이, 큰 카드 패딩.
+space-8                32px  — 섹션 간 간격.
+space-12               48px  — 스플래시 상단 여백, 빈 상태 위아래.
+
+[모서리 Radius]
+radius-sm              8px  — 배지·칩(사각형형), 작은 썸네일.
+radius-md              14px  — 품목 썸네일(48px), 카드 안 보조 타일, 입력 필드.
+radius-lg              16px  — 주요 버튼(56px 높이), 사원증 태그 버튼.
+radius-xl              24px  — 콘텐츠 카드, 시즌 사진 카드, 바텀시트 상단.
+radius-full            999px  — 포인트 필, 상태 점, 토글, 캐러셀 인디케이터.
+
+[그림자 Shadow]
+shadow-card            0 1px 2px rgba(34, 34, 34, 0.04), 0 6px 16px rgba(120, 82, 20, 0.06)  — ground 위 surface 카드.
+shadow-hero            0 14px 32px rgba(120, 70, 10, 0.18)  — 시즌 사진 카드 — 레퍼런스의 떠 있는 음식 카드 느낌.
+shadow-tabbar          0 -1px 0 rgba(34, 34, 34, 0.06), 0 -8px 24px rgba(120, 82, 20, 0.06)  — 하단 탭바 상단 경계.
+shadow-action          0 6px 16px rgba(192, 84, 8, 0.28)  — action-primary 버튼 아래 같은 색 계열 그림자.
+shadow-header          0 4px 14px rgba(120, 82, 20, 0.06)  — 상단바 아래 — surface 바탕 + line 1px 경계와 함께.
+
+[크기 Size]
+size-tap               48px  — 최소 터치 영역.
+size-button            56px  — 주요 버튼(시작하기, 제출) 높이.
+size-thumb             48px  — 목록 품목 사진 썸네일.
+size-tabbar            64px  — 하단 탭바 높이(안전 영역 별도).
+size-hero-card         340px  — 시즌 사진 카드 높이. 너비는 화면 - 2×space-5, 다음 카드 16px 노출.
+size-content-max       480px  — 데스크톱에서 모바일 레이아웃 최대 폭.
+
+[투명도 Opacity]
+opacity-disabled       0.4  — 비활성 컨트롤.
+opacity-pressed        0.92  — 카드·행 눌림 피드백.
+
+[CSS 변수]
+:root {
+  --brand-50: #FFF6EC;
+  --brand-100: #FEE3C6;
+  --brand-500: #FA8112;
+  --brand-600: #E06D05;
+  --brand-700: #C05408;
+  --brand-800: #A84A06;
+  --logo-accent: #F34F00;
+  --action-primary: var(--brand-700);
+  --action-primary-pressed: var(--brand-800);
+  --on-action: #FFFFFF;
+  --action-tonal: var(--brand-100);
+  --on-tonal: var(--brand-800);
+  --ground: #FAF3E1;
+  --surface: #FFFDF8;
+  --surface-sand: #F5E7C6;
+  --surface-sunken: #F2EAD3;
+  --line: #EADDBC;
+  --line-strong: #D9C79C;
+  --ink-900: #222222;
+  --ink-700: #4A443B;
+  --ink-500: #716755;
+  --ink-300: #A99F8C;
+  --on-dark: #FFFFFF;
+  --scrim: rgba(74, 38, 8, 0.8);
+  --season: #FFC94A;
+  --stock-ok: #276B2C;
+  --stock-ok-soft: #E5F2E1;
+  --stock-low: #8A5A00;
+  --stock-low-dot: #F5B400;
+  --stock-low-soft: #FFF1C7;
+  --stock-out: #C62828;
+  --stock-out-soft: #FCE5E1;
+  --stock-out-strong: #B42318;
+  --pending: #8C8476;
+  --star: #F5A100;
+  --focus-ring: #C05408;
+  --splash-ground: #FFFFFF;
+  --chip-bg: var(--surface);
+  --chip-border: var(--line-strong);
+  --chip-fg: var(--ink-700);
+  --chip-selected-bg: var(--brand-100);
+  --chip-selected-fg: var(--brand-800);
+  --status-done-bg: #ECEAE6;
+  --status-done-fg: var(--ink-500);
+  --star-filled: var(--star);
+  --star-filled-stroke: #E08E00;
+  --star-empty: var(--surface-sunken);
+  --star-empty-stroke: #94804F;
+  --illust-thumb-bg: #FFF1DC;
+  --illust-halo: rgba(255, 255, 255, 0.45);
+  --illust-bungeoppang: #FCD9A8;
+  --illust-yogurt: #FBD3DC;
+  --illust-icecream: #D7EEE6;
+  --font-sans: Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 999px;
+  --shadow-card: 0 1px 2px rgba(34, 34, 34, 0.04), 0 6px 16px rgba(120, 82, 20, 0.06);
+  --shadow-hero: 0 14px 32px rgba(120, 70, 10, 0.18);
+  --shadow-tabbar: 0 -1px 0 rgba(34, 34, 34, 0.06), 0 -8px 24px rgba(120, 82, 20, 0.06);
+  --shadow-action: 0 6px 16px rgba(192, 84, 8, 0.28);
+  --shadow-header: 0 4px 14px rgba(120, 82, 20, 0.06);
+  --size-tap: 48px;
+  --size-button: 56px;
+  --size-thumb: 48px;
+  --size-tabbar: 64px;
+  --size-hero-card: 340px;
+  --size-content-max: 480px;
+  --opacity-disabled: 0.4;
+  --opacity-pressed: 0.92;
+}

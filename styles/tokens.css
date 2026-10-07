@@ -1,0 +1,95 @@
+/* 삼일냠냠 디자인 토큰 v3 — 디자인 시스템 tokens.json에서 생성 */
+:root {
+  --brand-50: #FFF6EC; /* 가장 옅은 오렌지 틴트. 선택된 리스트 행, 눌림 배경. */
+  --brand-100: #FEE3C6; /* 보조 버튼(action-tonal) 바탕, 포인트 필, 사원증 태그 버튼. 위 글자·아이콘은 brand-80 */
+  --brand-500: #FA8112; /* 레퍼런스 핵심 오렌지. 진행 바·캐러셀 인디케이터·단계 표시처럼 글자가 올라가지 않는 '면'과 마크에 사용. */
+  --brand-600: #E06D05; /* 흰 카드 위 24px 이상 큰 숫자(적립 포인트) — 흰색 위 3.3:1. */
+  --brand-700: #C05408; /* 주요 버튼(action-primary)의 바탕, 흰 카드 위 오렌지 글자·아이콘(활성 탭 라벨, '20P'  */
+  --brand-800: #A84A06; /* 크림 바탕이나 brand-100 위 오렌지 글자, 주요 버튼 눌림. 크림 위 5.2:1. */
+  --logo-accent: #F34F00; /* 로고타입 '냠냠' 전용 색(삼일회계법인 PwC 오렌지에 맞춤). 로고 외 글자·버튼에는 쓰지 않음. */
+  --action-primary: var(--brand-700); /* 주요 버튼 바탕(가져갔어요, 알려주고 20P 받기). 라벨은 on-action, 그림자 shadow-acti */
+  --action-primary-pressed: var(--brand-800); /* 주요 버튼 눌림. */
+  --on-action: #FFFFFF; /* action-primary 위 라벨·아이콘(4.65:1). 라벨 옆 포인트 칩은 흰색 20% 바탕. */
+  --action-tonal: var(--brand-100); /* 보조 행동 버튼 바탕(초코우유 리뷰 +30P). 앞에 관련 아이콘, 글자는 on-tonal. */
+  --on-tonal: var(--brand-800); /* action-tonal 위 글자·아이콘. */
+  --ground: #FAF3E1; /* 앱 전체 페이지 배경(레퍼런스 크림). */
+  --surface: #FFFDF8; /* 카드·시트·탭바 표면. ground 위에 떠 있는 흰 면. */
+  --surface-sand: #F5E7C6; /* 카드 안 보조 타일, 상시 배지 배경. */
+  --surface-sunken: #F2EAD3; /* 입력 필드, 비활성 버튼, 단계 표시 바의 미완료 구간. */
+  --line: #EADDBC; /* 카드 안 구분선·목록 행 경계(헤어라인). */
+  --line-strong: #D9C79C; /* 입력 필드·체크박스 테두리 등 컨트롤 경계. */
+  --ink-900: #222222; /* 레퍼런스 블랙. 제목·본문·주요 숫자, 로고 '삼일'. */
+  --ink-700: #4A443B; /* 보조 본문, 설명 문단. */
+  --ink-500: #716755; /* 메타 정보(총무팀 예고, 최근 제보 시각), 캡션, 비활성 탭 라벨. 크림·카드·sand 위 4.5:1 이상 */
+  --ink-300: #A99F8C; /* 플레이스홀더·비활성 글자(대비 예외), 장식 아이콘. */
+  --on-dark: #FFFFFF; /* 사진 카드 스크림 위 글자, danger·success 채움 위 글자. */
+  --scrim: rgba(74, 38, 8, 0.8); /* 시즌 사진 카드 하단 스크림의 끝색(따뜻한 갈색). 그라데이션 0% 투명 → 42% 60% → 100% 80 */
+  --season: #FFC94A; /* '시즌' 배지 배경. 위 글자는 ink-900(10.4:1). */
+  --stock-ok: #276B2C; /* 재고 충분·혼잡 '여유' 글자와 점. 수량 > 직전 입고량의 30%. */
+  --stock-ok-soft: #E5F2E1; /* '여유' 상태 칩·배너 배경, 토글 켜짐은 stock-ok 사용. */
+  --stock-low: #8A5A00; /* 재고 '부족'(직전 입고량 30% 이하)·혼잡 '보통' 글자. */
+  --stock-low-dot: #F5B400; /* 부족·보통 상태 점. 점은 반드시 글자(예: '6개 · 부족')와 함께 — 색만으로 구분하지 않음. */
+  --stock-low-soft: #FFF1C7; /* '부족'·'보통' 칩 배경. */
+  --stock-out: #C62828; /* '소진'·혼잡 '혼잡' 글자와 점, 오류. */
+  --stock-out-soft: #FCE5E1; /* '소진'·'혼잡' 칩 배경. 위 글자는 stock-out-strong. */
+  --stock-out-strong: #B42318; /* stock-out-soft 위 글자. */
+  --pending: #8C8476; /* 혼잡 '확인 중'(유효 제보 3명 미만) 점·아이콘. 글자는 ink-500. */
+  --star: #F5A100; /* 별점 별 아이콘. 숫자는 ink-900로 함께 표기. */
+  --focus-ring: #C05408; /* 키보드 포커스 링(2px). 크림·흰 면 위 3:1 이상. */
+  --splash-ground: #FFFFFF; /* 시작(스플래시) 화면 전용 흰 바탕. 다른 화면은 ground. */
+  --chip-bg: var(--surface); /* 선택 칩(또 먹을래요?, 태그) 선택 전 바탕. */
+  --chip-border: var(--line-strong); /* 선택 칩 선택 전 1px 테두리. 칩 안 글자가 식별을 맡으므로 테두리는 보조 신호. */
+  --chip-fg: var(--ink-700); /* 선택 칩 선택 전 글자(600). */
+  --chip-selected-bg: var(--brand-100); /* 선택 칩 선택 후 바탕(테두리도 같은 색). */
+  --chip-selected-fg: var(--brand-800); /* 선택 칩 선택 후 글자(700). brand-100 위 4.67:1. */
+  --status-done-bg: #ECEAE6; /* 완료돼 더 누를 수 없는 행동 표시(리뷰 완료) 바탕. 회색으로 '할 일'(action-tonal 주황)과  */
+  --status-done-fg: var(--ink-500); /* status-done-bg 위 글자·체크 아이콘(4.63:1). */
+  --star-filled: var(--star); /* 별점 입력에서 고른 별 채움. */
+  --star-filled-stroke: #E08E00; /* 고른 별 1px 외곽선. */
+  --star-empty: var(--surface-sunken); /* 별점 입력에서 아직 고르지 않은 별 채움. */
+  --star-empty-stroke: #94804F; /* 고르지 않은 별 1.4px 외곽선 — ground 위 3.47:1로 별 모양이 보이게. */
+  --illust-thumb-bg: #FFF1DC; /* 3D 간식 일러스트 썸네일 타일 바탕(일러스트는 타일의 82% 크기). */
+  --illust-halo: rgba(255, 255, 255, 0.45); /* 사진·일러스트 카드 안 일러스트 뒤 원형 하이라이트. */
+  --illust-bungeoppang: #FCD9A8; /* 붕어빵 카드·상세 히어로 바탕. */
+  --illust-yogurt: #FBD3DC; /* 딸기 요거트 카드 바탕. */
+  --illust-icecream: #D7EEE6; /* 아이스크림 카드 바탕. */
+  --font-sans: Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 999px;
+  --shadow-card: 0 1px 2px rgba(34, 34, 34, 0.04), 0 6px 16px rgba(120, 82, 20, 0.06);
+  --shadow-hero: 0 14px 32px rgba(120, 70, 10, 0.18);
+  --shadow-tabbar: 0 -1px 0 rgba(34, 34, 34, 0.06), 0 -8px 24px rgba(120, 82, 20, 0.06);
+  --shadow-action: 0 6px 16px rgba(192, 84, 8, 0.28);
+  --shadow-header: 0 4px 14px rgba(120, 82, 20, 0.06);
+  --size-tap: 48px;
+  --size-button: 56px;
+  --size-thumb: 48px;
+  --size-tabbar: 64px;
+  --size-hero-card: 340px;
+  --size-content-max: 480px;
+  --opacity-disabled: 0.4;
+  --opacity-pressed: 0.92;
+  --scrim-gradient: linear-gradient(180deg, rgba(74, 38, 8, 0) 0%, rgba(74, 38, 8, 0.6) 42%, rgba(74, 38, 8, 0.8) 100%);
+}
+/* 타입 스타일 */
+.t-display-logo { font-size: 36px; line-height: 42px; font-weight: 800; letter-spacing: -0.02em; }
+.t-display-num { font-size: 44px; line-height: 48px; font-weight: 800; letter-spacing: -0.02em; }
+.t-hero { font-size: 30px; line-height: 36px; font-weight: 800; letter-spacing: -0.02em; }
+.t-title-lg { font-size: 24px; line-height: 32px; font-weight: 700; letter-spacing: -0.01em; }
+.t-title-md { font-size: 20px; line-height: 28px; font-weight: 700; letter-spacing: normal; }
+.t-title-sm { font-size: 17px; line-height: 24px; font-weight: 700; letter-spacing: normal; }
+.t-body { font-size: 15px; line-height: 22px; font-weight: 400; letter-spacing: normal; }
+.t-body-strong { font-size: 15px; line-height: 22px; font-weight: 600; letter-spacing: normal; }
+.t-caption { font-size: 13px; line-height: 18px; font-weight: 400; letter-spacing: normal; }
+.t-label { font-size: 11px; line-height: 14px; font-weight: 600; letter-spacing: normal; }
