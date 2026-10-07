@@ -242,7 +242,9 @@
     if (!picked.length) return null;
     var hadSeason = seasonAvailable().length > 0;
     var before = {};
-    var tag = { id: ui.tagId || uid('tag'), t: T, line: hadSeason ? ui.line : null, items: [] };
+    // [개선 2] 직접 고른 인원(0명 포함)만 줄 제보로 저장. '확인 못 했어요'는 수령만 기록
+    var reported = hadSeason && typeof ui.line === 'number';
+    var tag = { id: ui.tagId || uid('tag'), t: T, line: reported ? ui.line : null, lineSkipped: hadSeason && !reported, items: [] };
     picked.forEach(function (id) {
       var it = getItem(id); var q = ui.pick[id];
       before[id] = est(it);
@@ -252,13 +254,13 @@
       S.records.unshift({ id: uid('rc'), tag: tag.id, item: id, qty: q, line: tag.line, t: T, day: serviceDay(T) });
     });
     var congBefore = congestion(T);
-    if (hadSeason) S.lineReports.push({ user: ME, q: ui.line, t: T, tag: tag.id });
+    if (reported) S.lineReports.push({ user: ME, q: ui.line, t: T, tag: tag.id });
     S.tags.unshift(tag);
     var names = picked.map(function (id) { return getItem(id).name; });
     S.points.unshift({ t: T, what: '수령 참여 · ' + names[0] + (names.length > 1 ? ' 외 ' + (names.length - 1) + '종' : ''), pts: 20 });
     save();
-    ui.last = { tag: tag.id, before: before, congBefore: congBefore, hadSeason: hadSeason };
-    ui.pick = {}; ui.line = 0; ui.tagId = null;
+    ui.last = { tag: tag.id, before: before, congBefore: congBefore, hadSeason: hadSeason, lineReported: reported };
+    ui.pick = {}; ui.line = null; ui.lineHint = false; ui.tagId = null;
     if (S.settings.review) setTimeout(function () { toast('리뷰를 남기면 30P를 더 드려요', names[0] + '은(는) 어떠셨나요?', 'review'); }, 1400);
     return tag;
   }
@@ -267,6 +269,7 @@
     var r = null;
     for (var i = S.lineReports.length - 1; i >= 0; i--) if (S.lineReports[i].user === ME) { r = S.lineReports[i]; break; }
     if (!r || T - r.t > WINDOW) return false;
+    if (ui.last && r.tag !== ui.last.tag) return false;   // [개선 2] 이번 수령에서 제보한 기록만 고침
     r.q = clamp(r.q + delta, 0, 99); r.t = T;     // 2분 안에 고치면 최신 기록으로 갱신
     for (var j = 0; j < S.tags.length; j++) if (S.tags[j].id === r.tag) S.tags[j].line = r.q;
     S.records.forEach(function (rc) { if (rc.tag === r.tag) rc.line = r.q; });
@@ -337,7 +340,7 @@
 
   /* ------------------------------------------------------------------ 화면 조각 */
   var ui = freshUI();
-  function freshUI() { return { pick: {}, line: 0, tagId: null, last: null, allReviews: {}, prefill: null, menu: null, ana: { period: 'week', kind: 'all', sort: 'good' }, histAll: false, inQty: {}, checkQty: {} }; }
+  function freshUI() { return { pick: {}, line: null, tagId: null, last: null, allReviews: {}, prefill: null, menu: null, ana: { period: 'week', kind: 'all', sort: 'good' }, histAll: false, inQty: {}, checkQty: {} }; }
 
   function header(opts) {
     opts = opts || {};
@@ -556,6 +559,18 @@
     html += '</div><div class="spacer"></div>' + tabbar('receive') + '</div>';
     return html;
   }
+  // [개선 1] 간식 고르기: 시즌/상시를 소제목으로 나눠 표시 (카드 디자인은 그대로)
+  function pickGroup(title, list) {
+    if (!list.length) return '';
+    return '<div data-pick-group style="display:flex;flex-direction:column;gap:10px"><h3 style="margin:0;font-size:15px;line-height:20px;font-weight:700;color:var(--ink-700)">' + title + ' <span style="font-weight:600;color:var(--ink-500)">' + list.length + '</span></h3>' +
+      '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">' + list.map(function (it) {
+        var q = ui.pick[it.id] || 0;
+        return '<div class="pick' + (q ? ' is-on' : '') + '"><span class="pick__check" aria-hidden="true">' + I.check(14, 'currentColor', 2.6) + '</span>' + thumb(it, 56, 14) +
+          '<div class="pick__info"><span class="pick__name">' + esc(it.name) + '</span><div style="display:flex;gap:6px;align-items:center">' + kindBadge(it) + '<span style="font-size:12px;color:var(--ink-500)">' + qtyText(it) + '</span></div></div>' +
+          '<button type="button" class="pick__select" data-act="pick-inc" data-id="' + it.id + '" aria-label="' + esc(it.name) + ' 선택">선택</button>' +
+          '<div class="pick__qty"><button type="button" data-act="pick-dec" data-id="' + it.id + '" aria-label="' + esc(it.name) + ' 하나 빼기">−</button><span>' + q + '개</span><button type="button" data-act="pick-inc" data-id="' + it.id + '" aria-label="' + esc(it.name) + ' 하나 더하기">+</button></div></div>';
+      }).join('') + '</div></div>';
+  }
   function vPick() {
     var avail = S.items.filter(function (it) { var s = stateOf(it); return s === 'ok' || s === 'low'; });
     avail.sort(function (a, b) { return (a.kind === 'season' ? 0 : 1) - (b.kind === 'season' ? 0 : 1); });
@@ -565,24 +580,30 @@
       '<h1 style="margin:0;font-size:24px;line-height:32px;font-weight:700">간식수령 및 제보</h1>' + steps(hasSeason && cnt ? 3 : 2) +
       '<div class="tag-anim" style="height:48px;font-size:15px">' + I.check(20) + '사원증 태그 확인 · 냉장고 ' + hhmm(now()) + ' <span class="mock-note" style="border-color:var(--stock-ok);color:var(--stock-ok)">모의</span></div>' +
       '<div style="display:flex;flex-direction:column;gap:4px"><h2 style="margin:0;font-size:20px;line-height:28px;font-weight:700">무엇을 가져가셨나요?</h2><p style="margin:0;font-size:13px;line-height:18px;color:var(--ink-500)">여러 개 고를 수 있어요 · 소진·입고 예정 간식은 빠져 있어요</p></div>' +
-      '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">' + avail.map(function (it) {
-        var q = ui.pick[it.id] || 0;
-        return '<div class="pick' + (q ? ' is-on' : '') + '"><span class="pick__check" aria-hidden="true">' + I.check(14, 'currentColor', 2.6) + '</span>' + thumb(it, 56, 14) +
-          '<div class="pick__info"><span class="pick__name">' + esc(it.name) + '</span><div style="display:flex;gap:6px;align-items:center">' + kindBadge(it) + '<span style="font-size:12px;color:var(--ink-500)">' + qtyText(it) + '</span></div></div>' +
-          '<button type="button" class="pick__select" data-act="pick-inc" data-id="' + it.id + '" aria-label="' + esc(it.name) + ' 선택">선택</button>' +
-          '<div class="pick__qty"><button type="button" data-act="pick-dec" data-id="' + it.id + '" aria-label="' + esc(it.name) + ' 하나 빼기">−</button><span>' + q + '개</span><button type="button" data-act="pick-inc" data-id="' + it.id + '" aria-label="' + esc(it.name) + ' 하나 더하기">+</button></div></div>';
-      }).join('') + '</div>';
+      pickGroup('시즌 간식', avail.filter(function (it) { return it.kind === 'season'; })) +
+      pickGroup('상시 간식', avail.filter(function (it) { return it.kind !== 'season'; }));
     if (hasSeason) {
-      html += '<section class="card" style="padding:20px;gap:14px"><div style="display:flex;flex-direction:column;gap:4px"><h2 style="margin:0;font-size:17px;line-height:24px;font-weight:700">내 뒤에 남은 줄 인원</h2><p style="margin:0;font-size:13px;line-height:18px;color:var(--ink-500)">받고 나올 때 내 뒤에 서 있던 인원이에요. 혼잡도 계산에 바로 반영되고, 2분 안에는 고칠 수 있어요.</p></div>' +
-        '<div class="stepper"><button type="button" aria-label="한 명 빼기" data-act="line-dec">−</button><span class="stepper__val">' + ui.line + '<span style="font-size:17px;font-weight:700"> 명</span></span><button type="button" aria-label="한 명 더하기" data-act="line-inc">+</button></div>' +
-        '<div class="chips">' + [0, 3, 8, 15, 20].map(function (v) { return '<button type="button" class="chip" style="height:36px;padding:0 12px;font-size:13px" aria-pressed="' + (ui.line === v) + '" data-act="line-set" data-v="' + v + '">' + (v === 0 ? '없음' : v + '명') + '</button>'; }).join('') + '</div></section>';
+      html += '<section class="card" data-line-card style="padding:20px;gap:14px"><div style="display:flex;flex-direction:column;gap:4px"><h2 style="margin:0;font-size:17px;line-height:24px;font-weight:700">내 뒤에 남은 줄 인원</h2><p style="margin:0;font-size:13px;line-height:18px;color:var(--ink-500)">받고 나올 때 내 뒤에 서 있던 인원이에요. 혼잡도 계산에 바로 반영되고, 2분 안에는 고칠 수 있어요.</p></div>' +
+        '<div class="stepper"><button type="button" aria-label="한 명 빼기" data-act="line-dec"' + (typeof ui.line === 'number' ? '' : ' aria-disabled="true"') + '>−</button><span class="stepper__val">' + (typeof ui.line === 'number' ? ui.line + '<span style="font-size:17px;font-weight:700"> 명</span>' : '<span style="font-size:17px;font-weight:700;color:var(--ink-500)">' + (ui.line === 'skip' ? '확인 못 함' : '선택 안 함') + '</span>') + '</span><button type="button" aria-label="한 명 더하기" data-act="line-inc">+</button></div>' +
+        '<div class="chips">' + [0, 3, 8, 15, 20].map(function (v) { return '<button type="button" class="chip" style="height:36px;padding:0 12px;font-size:13px" aria-pressed="' + (ui.line === v) + '" data-act="line-set" data-v="' + v + '">' + (v === 0 ? '줄 없음' : v + '명') + '</button>'; }).join('') +
+        '<button type="button" class="chip" style="height:36px;padding:0 12px;font-size:13px" aria-pressed="' + (ui.line === 'skip') + '" data-act="line-skip">확인 못 했어요</button></div>' +
+        '<p data-line-hint ' + (ui.lineHint ? '' : 'hidden') + ' style="margin:0;font-size:13px;line-height:18px;font-weight:600;color:var(--stock-out-strong)">줄 인원을 고르거나 \'확인 못 했어요\'를 눌러 주세요</p>' +
+        (ui.line === 'skip' ? '<p style="margin:0;font-size:13px;line-height:18px;color:var(--ink-500)">줄 제보 없이 수령만 기록하고 20P는 그대로 드려요.</p>' : '') + '</section>';
     } else {
       html += '<p style="margin:0;font-size:13px;line-height:18px;color:var(--ink-500)">지금은 시즌 간식이 없어 줄 인원은 받지 않아요.</p>';
     }
     html += '<div style="display:flex;flex-direction:column;gap:8px"><button type="button" class="btn btn--primary" data-act="submit-pick" aria-disabled="' + (cnt ? 'false' : 'true') + '">알려주고 20P 받기' + (cnt ? ' · ' + cnt + '개' : '') + '</button>' +
       '<p data-pick-hint ' + (ui.hint ? '' : 'hidden') + ' style="margin:0;text-align:center;font-size:13px;color:var(--stock-out-strong)">가져간 간식을 하나 이상 골라 주세요</p>' +
-      '<a class="btn btn--text" href="#receive" data-act="skip-pick">건너뛰기</a></div></div><div class="spacer"></div>' + tabbar('receive') + '</div>';
+      '<a class="btn btn--text" href="#receive" data-act="skip-pick">건너뛰기</a></div></div>' + pickBar(cnt, hasSeason) + '<div class="spacer"></div>' + tabbar('receive') + '</div>';
     return html;
+  }
+  // [개선 1] 고른 간식 요약 + 다음 버튼. 제출 버튼이 화면에 보이면 숨김(bindPickBar)
+  function pickBar(cnt, hasSeason) {
+    if (!cnt) return '';
+    var picked = Object.keys(ui.pick).filter(function (k) { return ui.pick[k] > 0; });
+    var summary = picked.map(function (k) { return esc(getItem(k).name) + ' ' + ui.pick[k]; }).join(' · ');
+    return '<div class="pickbar" data-pickbar role="region" aria-label="고른 간식"><div class="pickbar__info"><span class="pickbar__count">' + cnt + '개 골랐어요</span><span class="pickbar__sum">' + summary + '</span></div>' +
+      '<button type="button" class="btn btn--primary pickbar__btn" data-act="pickbar-next">' + (hasSeason ? '다음 · 줄 인원' : '다음') + '</button></div>';
   }
   function vDone() {
     var L = ui.last;
@@ -590,12 +611,13 @@
     var tag = null; for (var i = 0; i < S.tags.length; i++) if (S.tags[i].id === L.tag) tag = S.tags[i];
     if (!tag) return vReceive();
     var c = congestion();
-    var canEdit = L.hadSeason && now() - tag.t <= WINDOW;
+    var canEdit = L.lineReported !== false && L.hadSeason && now() - tag.t <= WINDOW;
     var html = '<div class="screen" data-screen="done" aria-label="수령 참여 완료">' + header() + '<div style="display:flex;flex-direction:column;gap:20px;padding:20px 20px 32px">' + steps(4) +
       '<section class="card done-hero"><span class="done-hero__icon">' + I.check(40, '#276B2C', 2.6) + '</span><h1 style="margin:0;font-size:24px;line-height:32px;font-weight:800">알려주셔서 고마워요!</h1><span class="pill" style="height:32px;font-size:15px;background:var(--brand-100);color:var(--brand-800)">+20P 적립 · 지금 ' + myPoints() + 'P</span></section>' +
       '<div class="sec"><div class="sec__head"><h2 class="sec__title">바로 반영됐어요</h2><span class="sec__meta">' + hhmm(tag.t) + '</span></div><section class="card" style="padding:4px 20px">' +
       tag.items.map(function (e) { var it = getItem(e[0]); return '<div class="delta">' + thumb(it, 40, 12) + '<div class="row-link__info"><span style="font-size:16px;font-weight:700">' + esc(it.name) + ' · ' + e[1] + '개 수령</span><span class="row-link__sub">남은 수량(추정)</span></div><span style="font-size:15px;font-weight:700"><span style="color:var(--ink-500)">' + L.before[e[0]] + '</span> <span class="delta__arrow">→</span> ' + est(it) + '개</span></div>'; }).join('') +
-      (L.hadSeason ? '<div class="delta"><span style="width:40px;height:40px;border-radius:12px;background:' + LV[c.level].bg + ';display:flex;align-items:center;justify-content:center;flex-shrink:0">' + I.people(22, '#8A5A00') + '</span><div class="row-link__info"><span style="font-size:16px;font-weight:700">줄 제보 ' + tag.line + '명</span><span class="row-link__sub">혼잡도 ' + LV[L.congBefore.level].label + ' → ' + LV[c.level].label + (c.Q != null ? ' · 중앙값 ' + fmtQ(c.Q) + '명' : '') + '</span></div>' + lvPill(c) + '</div>' : '') +
+      (L.hadSeason && L.lineReported === false ? '<div class="delta"><span style="width:40px;height:40px;border-radius:12px;background:var(--surface-sunken);display:flex;align-items:center;justify-content:center;flex-shrink:0">' + I.people(22, '#8A7F72') + '</span><div class="row-link__info"><span style="font-size:16px;font-weight:700">대기 인원 미제보</span><span class="row-link__sub">혼잡도 계산에 넣지 않았어요 · 지금 ' + LV[c.level].label + '</span></div>' + lvPill(c) + '</div>' : '') +
+      (L.hadSeason && L.lineReported !== false ? '<div class="delta"><span style="width:40px;height:40px;border-radius:12px;background:' + LV[c.level].bg + ';display:flex;align-items:center;justify-content:center;flex-shrink:0">' + I.people(22, '#8A5A00') + '</span><div class="row-link__info"><span style="font-size:16px;font-weight:700">줄 제보 ' + tag.line + '명</span><span class="row-link__sub">혼잡도 ' + LV[L.congBefore.level].label + ' → ' + LV[c.level].label + (c.Q != null ? ' · 중앙값 ' + fmtQ(c.Q) + '명' : '') + '</span></div>' + lvPill(c) + '</div>' : '') +
       '</section>' + (L.hadSeason ? '<div style="padding:0 4px">' + calcLine(c) + '</div>' : '') + '</div>';
     if (canEdit) html += '<section class="card" style="padding:16px 20px;gap:10px"><span style="font-size:15px;font-weight:700">줄 인원을 잘못 입력했나요?</span><span style="font-size:13px;color:var(--ink-500)">2분 안에는 고칠 수 있어요. 고치면 최신 기록으로 바뀌어요.</span><div class="stepper" style="padding:4px"><button type="button" data-act="edit-line" data-v="-1" aria-label="한 명 빼기">−</button><span class="stepper__val" style="font-size:22px">' + tag.line + '<span style="font-size:15px"> 명</span></span><button type="button" data-act="edit-line" data-v="1" aria-label="한 명 더하기">+</button></div></section>';
     html += '<div style="display:flex;flex-direction:column;gap:8px"><button type="button" class="btn btn--primary" data-act="review" data-id="' + tag.items[0][0] + '">' + esc(getItem(tag.items[0][0]).name) + ' 리뷰 쓰고 30P 받기</button><a class="btn btn--ghost" href="#receive">수령 기록 보기</a><a class="btn btn--text" href="#home">간식현황으로</a></div></div><div class="spacer"></div>' + tabbar('receive') + '</div>';
@@ -865,9 +887,12 @@
     var y = window.scrollY;
     var carX = 0; var car = app.querySelector('[data-carousel]'); if (car) carX = car.scrollLeft;
     app.innerHTML = html;
+    // [개선 3 · 조권영 실기기 피드백] 같은 화면 안에서 다시 그릴 때는 등장 애니메이션을 끄고 바로 바꿈(새로고침처럼 깜빡이던 문제)
+    if (keepScroll) { var sc = app.querySelector('.screen'); if (sc) sc.classList.add('is-static'); }
     if (keepScroll) { window.scrollTo(0, y); var c2 = app.querySelector('[data-carousel]'); if (c2) c2.scrollLeft = carX; }
     bindCarousel();
     bindInputs();
+    bindPickBar();
     document.title = (r === 'splash' || r === 'home' ? '삼일냠냠 · 사내 간식 관리' : (app.querySelector('.screen') || {}).getAttribute('aria-label') + ' · 삼일냠냠');
   }
   function bindCarousel() {
@@ -879,6 +904,19 @@
       var i = Math.round(track.scrollLeft / step);
       dots.forEach(function (d, j) { d.classList.toggle('is-active', i === j); });
     }, { passive: true });
+  }
+  var pickObs = null;
+  function bindPickBar() {
+    if (pickObs) { pickObs.disconnect(); pickObs = null; }
+    var bar = app.querySelector('[data-pickbar]'); var sub = app.querySelector('[data-act="submit-pick"]');
+    if (!bar || !sub) return;
+    var tb = app.querySelector('.tabbar'); var tbh = tb ? tb.offsetHeight : 64;
+    var vis = function () { var r = sub.getBoundingClientRect(); return r.top < window.innerHeight - tbh && r.bottom > 0; };
+    bar.classList.toggle('is-hidden', vis());
+    if ('IntersectionObserver' in window) {
+      pickObs = new IntersectionObserver(function (es) { bar.classList.toggle('is-hidden', es[0].isIntersecting); }, { rootMargin: '0px 0px -' + tbh + 'px 0px' });
+      pickObs.observe(sub);
+    }
   }
   function bindInputs() {
     app.querySelectorAll('[data-in]').forEach(function (inp) {
@@ -931,17 +969,29 @@
         e.preventDefault();
         var zone = app.querySelector('[data-tag-zone]');
         if (zone) zone.innerHTML = '<div class="tag-anim">' + I.check(24, '#276B2C', 2.6) + '사원증 태그 확인 중…</div>';
-        ui.pick = {}; ui.line = 0; ui.hint = false; ui.tagId = uid('tag');
+        ui.pick = {}; ui.line = null; ui.hint = false; ui.lineHint = false; ui.tagId = uid('tag');
         setTimeout(function () { go('#pick'); }, 650);
         break;
       }
       case 'pick-inc': ui.pick[id] = Math.min((ui.pick[id] || 0) + 1, Math.max(1, est(getItem(id)))); ui.hint = false; render(true); break;
       case 'pick-dec': ui.pick[id] = Math.max((ui.pick[id] || 0) - 1, 0); render(true); break;
-      case 'line-inc': ui.line = Math.min(ui.line + 1, 99); render(true); break;
-      case 'line-dec': ui.line = Math.max(ui.line - 1, 0); render(true); break;
-      case 'line-set': ui.line = +v; render(true); break;
+      case 'line-inc': ui.line = typeof ui.line === 'number' ? Math.min(ui.line + 1, 99) : 1; ui.lineHint = false; render(true); break;
+      case 'line-dec': if (typeof ui.line !== 'number') return; ui.line = Math.max(ui.line - 1, 0); render(true); break;
+      case 'line-set': ui.line = +v; ui.lineHint = false; render(true); break;
+      case 'line-skip': ui.line = 'skip'; ui.lineHint = false; render(true); break;
       case 'skip-pick': ui.pick = {}; ui.tagId = null; break;
+      case 'pickbar-next': {
+        var tgt = app.querySelector('[data-line-card]') || app.querySelector('[data-act="submit-pick"]');
+        if (tgt) { var hd = app.querySelector('.app-header'); window.scrollTo({ top: tgt.getBoundingClientRect().top + window.scrollY - (hd ? hd.offsetHeight : 56) - 16, behavior: 'smooth' }); }
+        break;
+      }
       case 'submit-pick': {
+        // [개선 2] 시즌 간식이 있는데 줄 인원을 안 골랐으면 제출하지 않고 안내
+        if (Object.keys(ui.pick).some(function (k) { return ui.pick[k] > 0; }) && seasonAvailable().length && ui.line === null) {
+          ui.lineHint = true; render(true);
+          var lc = app.querySelector('[data-line-card]'); if (lc) { var hd2 = app.querySelector('.app-header'); window.scrollTo({ top: lc.getBoundingClientRect().top + window.scrollY - (hd2 ? hd2.offsetHeight : 56) - 16, behavior: 'smooth' }); }
+          return;
+        }
         if (!submitPick()) { ui.hint = true; render(true); return; }
         window.scrollTo(0, 0); go('#done'); break;
       }
